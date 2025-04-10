@@ -9,9 +9,9 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - /path/to/sonarr/data:/config
-      - /path/to/tvseries:/tv #optional
-      - /path/to/downloadclient-downloads:/downloads #optional
+      - /path/to/sonarr/data:/data
+      - /path/to/tvseries:/data/tv #optional
+      - /path/to/downloadclient-downloads:/data/downloads #optional
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -24,9 +24,9 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - /path/to/radarr/data:/config
-      - /path/to/movies:/movies #optional
-      - /path/to/download-client-downloads:/downloads #optional
+      - /path/to/radarr/data:/data
+      - /path/to/movies:/data/movies #optional
+      - /path/to/download-client-downloads:/data/downloads #optional
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -34,8 +34,16 @@ services:
   plex:
     image: plexinc/pms-docker
     container_name: plex
-    environment:
+    environment: host
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - VERSION=docker
+      - PLEX_CLAIM= #optional
     volumes:
-    ports:
-      - 42300:42300
+      - /path/to/plex/library:/data
+      - /path/to/tvseries:/data/tv
+      - /path/to/movies:/data/movies
+    # ports:
+    #   - 42300:42300
     restart: unless-stopped
