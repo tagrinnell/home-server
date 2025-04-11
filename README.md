@@ -33,9 +33,7 @@ That's really it.
 ## Docker Images Used:
 
 LinuxServer:
-1. 
-
- u  [Sonarr](https://github.com/linuxserver/docker-sonarr) 
+1. [Sonarr](https://github.com/linuxserver/docker-sonarr) 
 2. [Radarr](https://github.com/linuxserver/docker-radarr)
 3. [Overseer](https://github.com/linuxserver/docker-overseerr)
 4. [Wireguard](https://github.com/linuxserver/docker-wireguard)
@@ -65,3 +63,10 @@ Prowlarr maybe? \
 Lidarr \
 Readarr \
 bazarr / plexautolanguages 
+
+## Ports Running
+
+Jackett - 9117
+Overseerr - 5055
+Sonarr - 8989
+Wireguard - 51821
