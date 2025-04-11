@@ -1,3 +1,37 @@
+# Docker compose to set up containers for all services you need:
+# VPN
+#   Sonarr, Radarr, Lidarr, Qbittorrent
+# Non-VPN
+#   Plex, get_iplayer
+# Before running docker-compose, you should pre-create all of the following folders.
+# Folders for Docker State:
+#  /volume1/dockerdata.             - root where this docker-compose.yml should live
+#  /volume1/dockerdata/plex         - Plex config and DB
+#  /volume1/dockerdata/sonarr       - Sonarr config and DB
+#  /volume1/dockerdata/radarr       - Radarr config and DB
+#  /volume1/dockerdata/lidarr       - Lidarr config and DB
+#  /volume1/dockerdata/qbt          - QBitorrent config and DB
+#  /volume1/dockerdata/prowlarr     - Prowlarr config and DB
+#  /volume1/dockerdata/get_iplayer  - Get_iPlayer config and DB
+# Folders for Media etc:
+#  /volume1/photo                   - Root storage for photo files
+#  /volume1/music                   - Root storage for music files
+#  /volume1/video                   - Root storage for video files
+#  /volume1/video/TV                - folder for Sonarr/Plex TV shows
+#  /volume1/video/Films             - folder for Radarr/Plex Movies
+#  /volume1/video/Downloads         - QBT folder for TV downloads (that Sonarr will process)
+#  /volume1/video/FilmDownloads     - QBT folder for Movie downloads (that Radarr will process)
+#  /volume1/video/MusicDownloads    - QBT folder for Music downloads (that Lidarr will process)
+#  /volume1/video/Downloads/iPlayer - Destination folder for get_iplayer. See https://github.com/Webreaper/SonarrAutoImport
+# 
+# Note that Sonarr and Radarr don't necessarily need the VPN if you're using Prowlarr for the indexers. 
+# But Prowlarr should be behind the VPN to avoid ISPs that block indexers.
+
+#
+# Taken from: https://gist.github.com/Webreaper/81ecda3ecc45fa61a16dfc90cfc4550d
+#
+
+
 ---
 services:
   ### ----------------- Plex ----------------- ###
@@ -25,7 +59,7 @@ services:
       - PGID=1000
       - TZ=America/Chicago  
     volumes:
-      - /path/to/sonarr/data:/data
+      - /volume1/:/data
       - /path/to/tvseries:/data/tv #optional
       - /path/to/downloadclient-downloads:/data/downloads #optional
     ports:
@@ -48,14 +82,14 @@ services:
   #   restart: unless-stopped
   ### ----------------- Overseer ------------- ###
   overseerr:
-    image: lscr.io/linuxserver/overseerr:latest x
+    image: lscr.io/linuxserver/overseerr:latest
     container_name: overseerr
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Chicago
     volumes:
-      - /path/to/overseerr/config:/data/config
+      - /path/to/overseerr/config:/config
     ports:
       - 5055:5055
     restart: unless-stopped
