@@ -65,6 +65,9 @@ services:
     ports:
       - 8989:8989
     restart: unless-stopped
+    networks:
+      container_net:
+        ipv4_address: 192.168.0.11
   ### ----------------- Radarr --------------- ###
   radarr:
     image: lscr.io/linuxserver/radarr:latest
@@ -80,6 +83,9 @@ services:
     ports:
       - 7878:7878
     restart: unless-stopped
+    networks:
+      container_net:
+        ipv4_address: 192.168.0.12
   ### ----------------- Overseer ------------- ###
   overseerr:
     image: lscr.io/linuxserver/overseerr:latest
@@ -93,6 +99,9 @@ services:
     ports:
       - 5055:5055
     restart: unless-stopped
+    networks:
+      container_net:
+        ipv4_address: 192.168.0.13
   ### ----------------- Wireguard ------------ ###
   wg-easy:
     container_name: wg-easy
@@ -100,7 +109,8 @@ services:
 
     environment:
       - PASSWORD_HASH=$$2a$$12$$0Tn96.wvsP4k2AMjjSN9z..HqZpDm9nWGGqtBei5rjIKPXMw7EBS6
-      - WG_HOST=172.18.0.1
+      - WG_HOST=10.30.30.45
+      - WG_ALLOWED_IPS=192.168.0.0/16
 
     volumes:
       - /mnt/vol/dockerdata/wireguard:/etc/wireguard
@@ -109,7 +119,7 @@ services:
       - "51820:51820/udp"
       - "51821:51821/tcp"
       - "8080:8080/tcp"
-      - "9696:9696/tcp"
+      # - "9696:9696/tcp"
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -121,19 +131,21 @@ services:
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
-    depends_on: 
-      - wg-easy
-    network_mode: service:wg-easy
+    # depends_on: 
+    #   - wg-easy
+    # network_mode: service:wg-easy
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Chicago
     volumes:
       - /mnt/vol/dockerdata/prowlarr:/config
-    # ports:
-    #   - 9696:9696
+    ports:
+      - 9696:9696
     restart: unless-stopped
-
+    networks:
+      container_net:
+        ipv4_address: 192.168.0.14
   ### ----------------- Jackett ---------- ###
   # jackett:
   #   image: lscr.io/linuxserver/jackett:latest #lscr.io/linuxserver/jackett:latest
@@ -164,3 +176,11 @@ services:
     volumes:
       - /mnt/vol/dockerdata/qbt:/config
       - /mnt/vol/video/Downloads:/downloads #optional
+    
+networks:
+  container_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.0.0/16
+          gateway: 192.168.0.1
