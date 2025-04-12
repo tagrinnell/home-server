@@ -5,24 +5,24 @@
 #   Plex, get_iplayer
 # Before running docker-compose, you should pre-create all of the following folders.
 # Folders for Docker State:
-#  /volume1/dockerdata.             - root where this docker-compose.yml should live
-#  /volume1/dockerdata/plex         - Plex config and DB
-#  /volume1/dockerdata/sonarr       - Sonarr config and DB
-#  /volume1/dockerdata/radarr       - Radarr config and DB
-#  /volume1/dockerdata/lidarr       - Lidarr config and DB
-#  /volume1/dockerdata/qbt          - QBitorrent config and DB
-#  /volume1/dockerdata/prowlarr     - Prowlarr config and DB
-#  /volume1/dockerdata/get_iplayer  - Get_iPlayer config and DB
+#  /mnt/vol/dockerdata              - root where this docker-compose.yml should live
+#  /mnt/vol/dockerdata/plex         - Plex config and DB
+#  /mnt/vol/dockerdata/sonarr       - Sonarr config and DB
+#  /mnt/vol/dockerdata/radarr       - Radarr config and DB
+#  /mnt/vol/dockerdata/qbt          - QBitorrent config and DB
+#  /mnt/vol/dockerdata/prowlarr     - Prowlarr config and DB
+#  /mnt/vol/dockerdata/overseerr    - Overseerr config and DB
+#  /mnt/vol/dockerdata/lib/modules  - Wireguard lib/modules
+#  /mnt/vol/dockerdata/wireguard    - Wrieguard config
+#
 # Folders for Media etc:
-#  /volume1/photo                   - Root storage for photo files
-#  /volume1/music                   - Root storage for music files
-#  /volume1/video                   - Root storage for video files
-#  /volume1/video/TV                - folder for Sonarr/Plex TV shows
-#  /volume1/video/Films             - folder for Radarr/Plex Movies
-#  /volume1/video/Downloads         - QBT folder for TV downloads (that Sonarr will process)
-#  /volume1/video/FilmDownloads     - QBT folder for Movie downloads (that Radarr will process)
-#  /volume1/video/MusicDownloads    - QBT folder for Music downloads (that Lidarr will process)
-#  /volume1/video/Downloads/iPlayer - Destination folder for get_iplayer. See https://github.com/Webreaper/SonarrAutoImport
+#  /mnt/vol/photo                   - Root storage for photo files
+#  /mnt/vol/music                   - Root storage for music files
+#  /mnt/vol/video                   - Root storage for video files
+#  /mnt/vol/video/tv                - folder for Sonarr/Plex TV shows
+#  /mnt/vol/video/movies            - folder for Radarr/Plex Movies
+#  /mnt/vol/video/downloads         - QBT folder for TV downloads (that Sonarr will process)
+#  /mnt/vol/video/downloadsMovies   - QBT folder for Movie downloads (that Radarr will process)
 # 
 # Note that Sonarr and Radarr don't necessarily need the VPN if you're using Prowlarr for the indexers. 
 # But Prowlarr should be behind the VPN to avoid ISPs that block indexers.
@@ -46,12 +46,12 @@ services:
       - VERSION=docker
       # - PLEX_CLAIM= #optional
     volumes:
-      - /path/to/plex/library:/data
-      - /path/to/tvseries:/data/tv
-      - /path/to/movies:/data/movies
+      - /mnt/vol/dockerdata/plex:/config
+      - /mnt/vol/video/tv:/tv
+      - /mnt/vol/video/movies:/movies
     restart: unless-stopped
   ### ----------------- Sonarr --------------- ###
-  sonarr:
+  sonarr: 
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     environment:
@@ -59,27 +59,27 @@ services:
       - PGID=1000
       - TZ=America/Chicago  
     volumes:
-      - /volume1/:/data
-      - /path/to/tvseries:/data/tv #optional
-      - /path/to/downloadclient-downloads:/data/downloads #optional
+      - /mnt/vol/dockerdata/sonarr:/config 
+      - /mnt/vol/video/tv:/tv #optional
+      - /mnt/vol/video/Downloads:/downloads #optional
     ports:
       - 8989:8989
     restart: unless-stopped
   ### ----------------- Radarr --------------- ###
-  # radarr:
-  #   image: lscr.io/linuxserver/radarr:latest
-  #   container_name: radarr
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=America/Chicago
-  #   volumes:
-  #     - /path/to/radarr/data:/data
-  #     - /path/to/movies:/data/movies #optional
-  #     - /path/to/download-client-downloads:/data/downloads #optional
-  #   ports:
-  #     - 7878:7878
-  #   restart: unless-stopped
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - /mnt/vol/dockerdata/radarr:/data
+      - /mnt/vol/video/movies:/movies #optional
+      - /mnt/vol/video/downloadsMovies:/downloads #optional
+    ports:
+      - 7878:7878
+    restart: unless-stopped
   ### ----------------- Overseer ------------- ###
   overseerr:
     image: lscr.io/linuxserver/overseerr:latest
@@ -89,27 +89,10 @@ services:
       - PGID=1000
       - TZ=America/Chicago
     volumes:
-      - /path/to/overseerr/config:/config
+      - /mnt/vol/dockerdata/overseerr:/config
     ports:
       - 5055:5055
     restart: unless-stopped
-
-    # ### ----------------- Jackett ---------- ###
-  jackett:
-    image: lscr.io/linuxserver/jackett:latest #lscr.io/linuxserver/jackett:latest
-    container_name: jackett
-    environment:
-        - PUID=1000 # Change this to your user ID
-        - PGID=1000 # Change this to your group ID
-        - TZ=America/Chicago # Change this to your timezone
-        - AUTO_UPDATE=true
-    volumes:
-        - /opt/pvr/jackett:/data/jackettconfig
-        - /mnt/plex/downloads:/data/downloads
-    ports:
-        - 9117:9117
-    restart: unless-stopped
-
   ### ----------------- Wireguard ------------ ###
   wg-easy:
     container_name: wg-easy
@@ -120,12 +103,13 @@ services:
       - WG_HOST=172.18.0.1
 
     volumes:
-      - ./config:/etc/wireguard
-      - /lib/modules:/lib/modules
+      - /mnt/vol/dockerdata/wireguard:/etc/wireguard
+      - /mnt/vol/dockerdata/lib/modules:/lib/modules
     ports:
       - "51820:51820/udp"
       - "51821:51821/tcp"
       - "8080:8080/tcp"
+      - "9696:9696/tcp"
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -133,20 +117,50 @@ services:
     sysctls:
       - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
+  ### ----------------- Prowlarr ------------ ###
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    depends_on: 
+      - wg-easy
+    network_mode: service:wg-easy
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - /mnt/vol/dockerdata/prowlarr:/config
+    # ports:
+    #   - 9696:9696
+    restart: unless-stopped
+
+  ### ----------------- Jackett ---------- ###
+  # jackett:
+  #   image: lscr.io/linuxserver/jackett:latest #lscr.io/linuxserver/jackett:latest
+  #   container_name: jackett
+  #   environment:
+  #       - PUID=1000 # Change this to your user ID
+  #       - PGID=1000 # Change this to your group ID
+  #       - TZ=America/Chicago # Change this to your timezone
+  #       - AUTO_UPDATE=true
+  #   volumes:
+  #       - /opt/pvr/jackett:/config
+  #       - /mnt/plex/downloads:/downloads
+  #   ports:
+  #       - 9117:9117
+  #   restart: unless-stopped
   ### ----------------- QBitTorrent ---------- ###
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest 
     container_name: qbittorrent
     depends_on:
     - wg-easy
-    # network_mode: services:protonwire
     network_mode: service:wg-easy
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Chicago
-      # - WEBUI_PORT=8080
       - TORRENTING_PORT=6881
     volumes:
-      - /path/to/qbittorrent/appdata:/data/qbitConfig
-      - /path/to/downloads:/data/downloads #optional
+      - /mnt/vol/dockerdata/qbt:/config
+      - /mnt/vol/video/Downloads:/downloads #optional

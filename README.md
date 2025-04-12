@@ -5,11 +5,11 @@
 This is my repo for the docker compose files that I'll be using for my (eventual) home server.  Currently, the I have a compose file for the following systems:
 
 1. Plex Media Server (Streaming)
-2. Sonarr ()
-3. Radarr ()
+2. Sonarr (Shows)
+3. Radarr (Movies)
 4. Overseerr (Library Management)
 5. ProtonVPN / Wireguard (VPN for Qbit)
-6. QBitTorrent (Torrenting )
+6. QBitTorrent (Torrenting)
 7. Jackett (Torrent Management(?))
 
 ## Assorted Docs / General info
@@ -37,6 +37,7 @@ LinuxServer:
 2. [Radarr](https://github.com/linuxserver/docker-radarr)
 3. [Overseer](https://github.com/linuxserver/docker-overseerr)
 4. [Wireguard](https://github.com/linuxserver/docker-wireguard)
+5. [Prowlarr](https://github.com/linuxserver/docker-prowlarr)
 5. [Jackett](https://github.com/linuxserver/docker-jackett)
 
 Plex:
@@ -66,7 +67,10 @@ bazarr / plexautolanguages
 
 ## Ports Running
 
-Jackett - 9117
-Overseerr - 5055
-Sonarr - 8989
-Wireguard - 51821
+- Jackett - 9117 -- Using Prowlarr now
+- Prowlarr - 9696
+- Overseerr - 5055
+- Radarr - 7878
+- Sonarr - 8989
+- Wireguard - 51821
+- Plex - 31240
