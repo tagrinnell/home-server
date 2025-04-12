@@ -109,7 +109,7 @@ services:
 
     environment:
       - PASSWORD_HASH=$$2a$$12$$0Tn96.wvsP4k2AMjjSN9z..HqZpDm9nWGGqtBei5rjIKPXMw7EBS6
-      - WG_HOST=10.30.30.45
+      - WG_HOST=192.168.0.10
       - WG_ALLOWED_IPS=192.168.0.0/16
 
     volumes:
@@ -118,8 +118,6 @@ services:
     ports:
       - "51820:51820/udp"
       - "51821:51821/tcp"
-      - "8080:8080/tcp"
-      # - "9696:9696/tcp"
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -127,6 +125,9 @@ services:
     sysctls:
       - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
+    networks:
+      default:
+        ipv4_address: 192.168.0.50
   ### ----------------- Prowlarr ------------ ###
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
@@ -165,9 +166,9 @@ services:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest 
     container_name: qbittorrent
-    depends_on:
-    - wg-easy
-    network_mode: service:wg-easy
+    # depends_on:
+    # - wg-easy
+    # network_mode: service:wg-easy
     environment:
       - PUID=1000
       - PGID=1000
@@ -176,11 +177,16 @@ services:
     volumes:
       - /mnt/vol/dockerdata/qbt:/config
       - /mnt/vol/video/Downloads:/downloads #optional
+    ports:
+      - 8080:8080
+    networks:
+      container_net:
+        ipv4_address: 192.168.0.15
     
 networks:
   container_net:
     driver: bridge
     ipam:
       config:
-        - subnet: 192.168.0.0/16
+        - subnet: 192.168.0.0/24  
           gateway: 192.168.0.1
