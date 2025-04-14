@@ -204,7 +204,6 @@ services:
   #       - 9117:9117
   #   restart: unless-stopped
   ### ----------------- QBitTorrent ---------- ###
-<<<<<<< HEAD
   # qbittorrent:
   #   image: lscr.io/linuxserver/qbittorrent:latest 
   #   container_name: qbittorrent
@@ -219,36 +218,11 @@ services:
   #   volumes:
   #     - /mnt/vol/dockerdata/qbt:/config
   #     - /mnt/vol/video/Downloads:/downloads #optional
-=======
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest 
-    container_name: qbittorrent
-    # depends_on:
-    # - wg-easy
-    # network_mode: service:wg-easy
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Chicago
-      - TORRENTING_PORT=6881
-    volumes:
-      - /mnt/vol/dockerdata/qbt:/config
-      - /mnt/vol/video/Downloads:/downloads #optional
-    ports:
-      - 8080:8080
-    networks:
-      container_net:
-        ipv4_address: 192.168.0.15
->>>>>>> ae54195201f40feb29ccd7757e9afdc0864be237
     
 networks:
   container_net:
     driver: bridge
     ipam:
       config:
-<<<<<<< HEAD
         - subnet: 192.168.0.0/24
-=======
-        - subnet: 192.168.0.0/24  
->>>>>>> ae54195201f40feb29ccd7757e9afdc0864be237
           gateway: 192.168.0.1
