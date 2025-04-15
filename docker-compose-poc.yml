@@ -67,7 +67,7 @@ services:
     restart: unless-stopped
     networks:
       container_net:
-        ipv4_address: 192.168.0.11
+        ipv4_address: 172.28.0.11
   ### ----------------- Radarr --------------- ###
   radarr:
     image: lscr.io/linuxserver/radarr:latest
@@ -85,7 +85,7 @@ services:
     restart: unless-stopped
     networks:
       container_net:
-        ipv4_address: 192.168.0.12
+        ipv4_address: 172.28.0.12
   ### ----------------- Overseer ------------- ###
   overseerr:
     image: lscr.io/linuxserver/overseerr:latest
@@ -101,7 +101,7 @@ services:
     restart: unless-stopped
     networks:
       container_net:
-        ipv4_address: 192.168.0.13
+        ipv4_address: 172.28.0.13
 
   ### ----------------- Deluge VPN ------------- ###
   deluge-vpn:
@@ -132,7 +132,7 @@ services:
       ENABLE_SOCKS: yes
       SOCKS_USER: "tgrin"
       SOCKS_PASS: "7324102"
-      LAN_NETWORK: 192.168.0.0/24,10.30.30.45/32,172.28.0.0/16
+      LAN_NETWORK: 172.28.0.0/16
       # NAME_SERVERS: <name server ip(s)> \
       DELUGE_DAEMON_LOG_LEVEL: info
       DELUGE_WEB_LOG_LEVEL: debug
@@ -162,7 +162,7 @@ services:
     restart: unless-stopped
     networks:
       container_net:
-        ipv4_address: 192.168.0.14
+        ipv4_address: 172.28.0.14
   ### ----------------- Wireguard ------------ ###
   # wg-easy:
   #   container_name: wg-easy
@@ -219,10 +219,10 @@ services:
   #     - /mnt/vol/dockerdata/qbt:/config
   #     - /mnt/vol/video/Downloads:/downloads #optional
     
-networks:
-  container_net:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 192.168.0.0/24
-          gateway: 192.168.0.1
+# networks:
+#   container_net:
+#     driver: bridge
+#     ipam:
+#       config:
+#         - subnet: 192.168.0.0/24
+#           gateway: 192.168.0.1
