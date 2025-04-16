@@ -31,6 +31,8 @@
 # Taken from: https://gist.github.com/Webreaper/81ecda3ecc45fa61a16dfc90cfc4550d
 #
 
+# https://github.com/ivan-pinatti/docker-torrent-box-with-vpn
+
 
 ---
 services:
@@ -120,7 +122,7 @@ services:
       - /mnt/vol/video/downloads:/data
       - /mnt/vol/dockerdata/deluge:/config
     environment:
-      VPN_ENABLED: yes
+      VPN_ENABLED: no
       VPN_USER: "tgrin" 
       VPN_PASS: "7324102"
       VPN_PROV: pia
@@ -132,7 +134,7 @@ services:
       ENABLE_SOCKS: yes
       SOCKS_USER: "tgrin"
       SOCKS_PASS: "7324102"
-      LAN_NETWORK: 172.28.0.0/16
+      LAN_NETWORK: "172.28.0.0/16,10.30.30.45/23,172.28.32/12"
       # NAME_SERVERS: <name server ip(s)> \
       DELUGE_DAEMON_LOG_LEVEL: info
       DELUGE_WEB_LOG_LEVEL: debug
@@ -219,10 +221,10 @@ services:
   #     - /mnt/vol/dockerdata/qbt:/config
   #     - /mnt/vol/video/Downloads:/downloads #optional
     
-# networks:
-#   container_net:
-#     driver: bridge
-#     ipam:
-#       config:
-#         - subnet: 192.168.0.0/24
-#           gateway: 192.168.0.1
+networks:
+  container_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+          gateway: 172.28.0.1
