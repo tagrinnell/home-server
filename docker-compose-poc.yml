@@ -104,7 +104,6 @@ services:
     networks:
       container_net:
         ipv4_address: 172.21.1.13
-
   ### ----------------- Deluge VPN ------------- ###
   deluge-vpn:
     container_name: deluge-vpn
@@ -168,7 +167,7 @@ services:
     # networks:
     #   container_net:
     #     ipv4_address: 172.28.0.14
-
+  #
   protonwire:
     container_name: protonwire
     # Use semver tags or sha256 hashes of manifests.
@@ -195,12 +194,14 @@ services:
       net.ipv4.conf.all.rp_filter: 2
       net.ipv6.conf.all.disable_ipv6: 1
     volumes:
-      - type: tmpfs
-        target: /tmp
-      - type: bind
-        source: private.key
-        target: /etc/protonwire/private-key
-        read_only: true
+      - /mnt/vol/dockerdata/tmp:/tmp
+      - /mnt/vol/dockerdata/protonwire:/etc/protonwire
+      # - type: tmpfs
+      #   target: /tmp
+      # - type: bind
+      #   source: private.key
+      #   target: /etc/protonwire/private-key
+      #   read_only: true
     ports:
       - 8000:8000
   ### ----------------- QBitTorrent ---------- ###
