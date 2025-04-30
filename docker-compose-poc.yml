@@ -23,17 +23,16 @@
 #  /mnt/vol/video/movies            - folder for Radarr/Plex Movies
 #  /mnt/vol/video/downloads         - QBT folder for TV downloads (that Sonarr will process)
 #  /mnt/vol/video/downloadsMovies   - QBT folder for Movie downloads (that Radarr will process)
-# 
+#
 # Note that Sonarr and Radarr don't necessarily need the VPN if you're using Prowlarr for the indexers. 
 # But Prowlarr should be behind the VPN to avoid ISPs that block indexers.
 
 #
 # Taken from: https://gist.github.com/Webreaper/81ecda3ecc45fa61a16dfc90cfc4550d
+# https://linuxiac.com/how-to-set-up-wireguard-vpn-with-docker/
 #
 
 # https://github.com/ivan-pinatti/docker-torrent-box-with-vpn
-
-
 ---
 services:
   ### ----------------- Plex ----------------- ###
@@ -41,7 +40,7 @@ services:
     image: plexinc/pms-docker
     container_name: plex
     network_mode: host
-    environment: 
+    environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Chicago
@@ -53,15 +52,15 @@ services:
       - /mnt/vol/video/movies:/movies
     restart: unless-stopped
   ### ----------------- Sonarr --------------- ###
-  sonarr: 
+  sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=America/Chicago  
+      - TZ=America/Chicago
     volumes:
-      - /mnt/vol/dockerdata/sonarr:/config 
+      - /mnt/vol/dockerdata/sonarr:/config
       - /mnt/vol/video/tv:/tv #optional
       - /mnt/vol/video/Downloads:/downloads #optional
     ports:
@@ -69,7 +68,7 @@ services:
     restart: unless-stopped
     networks:
       container_net:
-        ipv4_address: 172.21.1.11
+        ipv4_address: 172.28.1.11
   ### ----------------- Radarr --------------- ###
   radarr:
     image: lscr.io/linuxserver/radarr:latest
@@ -87,7 +86,7 @@ services:
     restart: unless-stopped
     networks:
       container_net:
-        ipv4_address: 172.21.1.12
+        ipv4_address: 172.28.1.12
   ### ----------------- Overseer ------------- ###
   overseerr:
     image: lscr.io/linuxserver/overseerr:latest
@@ -103,48 +102,7 @@ services:
     restart: unless-stopped
     networks:
       container_net:
-        ipv4_address: 172.21.1.13
-  ### ----------------- Deluge VPN ------------- ###
-  deluge-vpn:
-    container_name: deluge-vpn
-    image: binhex/arch-delugevpn
-    ports:
-      - 8112:8112
-      - 8118:8118
-      - 9118:9118 
-      - 58846:58846 
-      - 58946:58946 
-      - 58946:58946/udp 
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - /mnt/vol/video/downloads:/data
-      - /mnt/vol/dockerdata/deluge:/config
-    environment:
-      VPN_ENABLED: yes
-      VPN_USER: "tgrin" 
-      VPN_PASS: "7324102"
-      VPN_PROV: pia
-      VPN_CLIENT: openvpn
-      ENABLE_STARTUP_SCRIPTS: yes
-      ENABLE_PRIVOXY: yes
-      STRICT_PORT_FORWARD: no
-      USERSPACE_WIREGUARD: no
-      ENABLE_SOCKS: yes
-      SOCKS_USER: "tgrin"
-      SOCKS_PASS: "7324102"
-      LAN_NETWORK: "172.28.0.0/24,10.30.30.45/23,172.28.32.0/12"
-      # NAME_SERVERS: <name server ip(s)> \
-      DELUGE_DAEMON_LOG_LEVEL: info
-      DELUGE_WEB_LOG_LEVEL: debug
-      DELUGE_ENABLE_WEBUI_PASSWORD: yes
-      VPN_INPUT_PORTS: 1234
-      VPN_OUTPUT_PORTS: 5678
-      DEBUG: true
-      UMASK: 000
-      PUID: 1000
-      PGID: 1000
-
+        ipv4_address: 172.28.1.13
   ### ----------------- Prowlarr ------------ ###
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
@@ -163,22 +121,19 @@ services:
     restart: unless-stopped
     networks:
       container_net:
-        ipv4_address: 172.21.1.14
-    # networks:
-    #   container_net:
-    #     ipv4_address: 172.28.0.14
-  #
+        ipv4_address: 172.28.0.14
+  ### ----------------- Proton VPN ---------- ### 
   protonwire:
     container_name: protonwire
     # Use semver tags or sha256 hashes of manifests.
     # using latest tag can lead to issues when used with
-    # automatic image updaters likze watchtower/podman.
+    # automatic image updaters like watchtower/podman.
     image: ghcr.io/tprasadtp/protonwire:latest
     init: true
     restart: unless-stopped
     environment:
       # Quote this value as server name can contain '#'.
-      PROTONVPN_SERVER: "node-nl-96.protonvpn.net"  # NL-FREE#100070
+      PROTONVPN_SERVER: "node-nl-96.protonvpn.net" # NL-FREE#100070
       # Set this to 1 to show debug logs for issue forms.
       DEBUG: "0"
       # Set this to 0 to disable kill-switch.
@@ -194,26 +149,21 @@ services:
       net.ipv4.conf.all.rp_filter: 2
       net.ipv6.conf.all.disable_ipv6: 1
     volumes:
-      - /mnt/vol/dockerdata/tmp:/tmp
-      - /mnt/vol/dockerdata/protonwire:/etc/protonwire
-      # - type: tmpfs
-      #   target: /tmp
-      # - type: bind
-      #   source: private.key
-      #   target: /etc/protonwire/private-key
-      #   read_only: true
+      - type: tmpfs
+        target: /mnt/vol/dockerdata/tmp
+      - type: bind
+        source: private.key
+        target: /mnt/vol/dockerdata/protonwire/private-key
+        read_only: true
     ports:
       - 8000:8000
-  ### ----------------- QBitTorrent ---------- ###
+  ### ----------------- QBitTorrent ---------- ### 
   qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest 
+    image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
-    ports:
-      - 6881:6881
-      - "8080:8080/tcp"
-    # depends_on:
-    # - wg-easy
-    # network_mode: service:wg-easy
+    depends_on:
+      - protonwire
+    network_mode: service:protonwire
     environment:
       - PUID=1000
       - PGID=1000
@@ -222,7 +172,6 @@ services:
     volumes:
       - /mnt/vol/dockerdata/qbt:/config
       - /mnt/vol/video/Downloads:/downloads #optional
-
   ### ----------------- Wireguard ------------ ###
   # wg-easy:
   #   container_name: wg-easy
@@ -263,7 +212,8 @@ services:
   #   ports:
   #       - 9117:9117
   #   restart: unless-stopped
-  # ### ----------------- Deluge VPN ------------- ###
+
+  ### ----------------- Deluge VPN ------------- ###
   # deluge-vpn:
   #   container_name: deluge-vpn
   #   image: binhex/arch-delugevpn
@@ -279,11 +229,8 @@ services:
   #   volumes:
   #     - /mnt/vol/video/downloads:/data
   #     - /mnt/vol/dockerdata/deluge:/config
-  #     # - /lib/module
-  #   devices:
-  #     - /dev/net/tun:/dev/net/tun
   #   environment:
-  #     VPN_ENABLED: yes 
+  #     VPN_ENABLED: yes
   #     VPN_USER: "tgrin" 
   #     VPN_PASS: "7324102"
   #     VPN_PROV: pia
@@ -295,7 +242,7 @@ services:
   #     ENABLE_SOCKS: yes
   #     SOCKS_USER: "tgrin"
   #     SOCKS_PASS: "7324102"
-  #     LAN_NETWORK: "172.0.0.0/8,10.48.0.0/16,181.0.0.0/8,104.0.0.0/8,172.0.0.0/8" # ,10.10.30.45/32"
+  #     LAN_NETWORK: "172.28.0.0/24,10.30.30.45/23,172.28.32.0/12"
   #     # NAME_SERVERS: <name server ip(s)> \
   #     DELUGE_DAEMON_LOG_LEVEL: info
   #     DELUGE_WEB_LOG_LEVEL: debug
@@ -306,11 +253,11 @@ services:
   #     UMASK: 000
   #     PUID: 1000
   #     PGID: 1000
-    
+
 networks:
   container_net:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.21.1.0/24
-          gateway: 172.21.1.1
+        - subnet: 172.28.1.0/24
+          gateway: 172.28.1.1
