@@ -122,98 +122,137 @@ services:
     networks:
       container_net:
         ipv4_address: 172.28.0.14
-
-  ### ----------------- Deluge VPN ------------- ###
-  deluge-vpn:
-    container_name: deluge-vpn
-    image: binhex/arch-delugevpn
-    ports:
-      - 8112:8112
-      - 8118:8118
-      - 9118:9118 
-      - 58846:58846 
-      - 58946:58946 
-      - 58946:58946/udp 
+  ### ----------------- Proton VPN ---------- ### 
+  protonwire:
+    container_name: protonwire
+    # Use semver tags or sha256 hashes of manifests.
+    # using latest tag can lead to issues when used with
+    # automatic image updaters like watchtower/podman.
+    image: ghcr.io/tprasadtp/protonwire:latest
+    init: true
+    restart: unless-stopped
+    environment:
+      # Quote this value as server name can contain '#'.
+      PROTONVPN_SERVER: "node-nl-96.protonvpn.net" # NL-FREE#100070
+      # Set this to 1 to show debug logs for issue forms.
+      DEBUG: "0"
+      # Set this to 0 to disable kill-switch.
+      KILL_SWITCH: "1"
+    # NET_ADMIN capability is mandatory!
     cap_add:
       - NET_ADMIN
+    # sysctl net.ipv4.conf.all.rp_filter is mandatory!
+    # net.ipv6.conf.all.disable_ipv6 disables IPv6 as protonVPN does not support IPv6.
+    # 'net.*' sysctls are not required on application containers,
+    # as they share network stack with protonwire container.
+    sysctls:
+      net.ipv4.conf.all.rp_filter: 2
+      net.ipv6.conf.all.disable_ipv6: 1
     volumes:
-      - /mnt/vol/video/downloads:/data
-      - /mnt/vol/dockerdata/deluge:/config
+      - type: tmpfs
+        target: /mnt/vol/dockerdata/tmp
+      - type: bind
+        source: private.key
+        target: /mnt/vol/dockerdata/protonwire/private-key
+        read_only: true
+    ports:
+      - 8000:8000
+  ### ----------------- QBitTorrent ---------- ### 
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    depends_on:
+      - protonwire
+    network_mode: service:protonwire
     environment:
-      VPN_ENABLED: yes
-      VPN_USER: "tgrin" 
-      VPN_PASS: "7324102"
-      VPN_PROV: pia
-      VPN_CLIENT: openvpn
-      ENABLE_STARTUP_SCRIPTS: yes
-      ENABLE_PRIVOXY: no
-      STRICT_PORT_FORWARD: no
-      USERSPACE_WIREGUARD: no
-      ENABLE_SOCKS: yes
-      SOCKS_USER: "tgrin"
-      SOCKS_PASS: "7324102"
-      LAN_NETWORK: "172.28.1.0/24,10.30.30.45/23,172.28.32.0/12,10.48.25.33/23"
-      # NAME_SERVERS: <name server ip(s)> \
-      DELUGE_DAEMON_LOG_LEVEL: info
-      DELUGE_WEB_LOG_LEVEL: debug
-      DELUGE_ENABLE_WEBUI_PASSWORD: yes
-      VPN_INPUT_PORTS: 1234
-      VPN_OUTPUT_PORTS: 5678
-      DEBUG: true
-      UMASK: 000
-      PUID: 1000
-      PGID: 1000
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+      - TORRENTING_PORT=6881
+    volumes:
+      - /mnt/vol/dockerdata/qbt:/config
+      - /mnt/vol/video/Downloads:/downloads #optional
+  ### ----------------- Wireguard ------------ ###
+  # wg-easy:
+  #   container_name: wg-easy
+  #   image: ghcr.io/wg-easy/wg-easy
 
-#  # ### ----------------- Proton VPN ---------- ### 
-  # protonwire:
-  #   container_name: protonwire
-  #   # Use semver tags or sha256 hashes of manifests.
-  #   # using latest tag can lead to issues when used with
-  #   # automatic image updaters like watchtower/podman.
-  #   image: ghcr.io/tprasadtp/protonwire:latest
-  #   init: true
-  #   restart: unless-stopped
   #   environment:
-  #     # Quote this value as server name can contain '#'.
-  #     PROTONVPN_SERVER: "node-nl-96.protonvpn.net" # NL-FREE#100070
-  #     # Set this to 1 to show debug logs for issue forms.
-  #     DEBUG: "0"
-  #     # Set this to 0 to disable kill-switch.
-  #     KILL_SWITCH: "1"
-  #   # NET_ADMIN capability is mandatory!
+  #     - PASSWORD_HASH=$$2a$$12$$0Tn96.wvsP4k2AMjjSN9z..HqZpDm9nWGGqtBei5rjIKPXMw7EBS6
+  #     - WG_HOST=10.30.30.45
+  #     - WG_ALLOWED_IPS=192.168.0.0/16
+
+  #   volumes:
+  #     - /mnt/vol/dockerdata/wireguard:/etc/wireguard
+  #     - /mnt/vol/dockerdata/lib/modules:/lib/modules
+  #   ports:
+  #     - "51820:51820/udp"
+  #     - "51821:51821/tcp"
+  #     - "8080:8080/tcp"
+  #     # - "9696:9696/tcp"
+  #   restart: unless-stopped
   #   cap_add:
   #     - NET_ADMIN
-  #   # sysctl net.ipv4.conf.all.rp_filter is mandatory!
-  #   # net.ipv6.conf.all.disable_ipv6 disables IPv6 as protonVPN does not support IPv6.
-  #   # 'net.*' sysctls are not required on application containers,
-  #   # as they share network stack with protonwire container.
+  #     - SYS_MODULE
   #   sysctls:
-  #     net.ipv4.conf.all.rp_filter: 2
-  #     net.ipv6.conf.all.disable_ipv6: 1
-  #   volumes:
-  #     - type: tmpfs
-  #       target: /mnt/vol/dockerdata/tmp
-  #     - type: bind
-  #       source: private.key
-  #       target: /mnt/vol/dockerdata/protonwire/private-key
-  #       read_only: true
-  #   ports:
-  #     - 8000:8000
-  # ### ----------------- QBitTorrent ---------- ### 
-  # qbittorrent:
-  #   image: lscr.io/linuxserver/qbittorrent:latest
-  #   container_name: qbittorrent
-  #   depends_on:
-  #     - protonwire
-  #   network_mode: service:protonwire
+  #     - net.ipv4.ip_forward=1
+  #     - net.ipv4.conf.all.src_valid_mark=1
+  ### ----------------- Jackett ---------- ###
+  # jackett:
+  #   image: lscr.io/linuxserver/jackett:latest #lscr.io/linuxserver/jackett:latest
+  #   container_name: jackett
   #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=America/Chicago
-  #     - TORRENTING_PORT=6881
+  #       - PUID=1000 # Change this to your user ID
+  #       - PGID=1000 # Change this to your group ID
+  #       - TZ=America/Chicago # Change this to your timezone
+  #       - AUTO_UPDATE=true
   #   volumes:
-  #     - /mnt/vol/dockerdata/qbt:/config
-  #     - /mnt/vol/video/Downloads:/downloads # optional
+  #       - /opt/pvr/jackett:/config
+  #       - /mnt/plex/downloads:/downloads
+  #   ports:
+  #       - 9117:9117
+  #   restart: unless-stopped
+
+  ### ----------------- Deluge VPN ------------- ###
+  # deluge-vpn:
+  #   container_name: deluge-vpn
+  #   image: binhex/arch-delugevpn
+  #   ports:
+  #     - 8112:8112
+  #     - 8118:8118
+  #     - 9118:9118 
+  #     - 58846:58846 
+  #     - 58946:58946 
+  #     - 58946:58946/udp 
+  #   cap_add:
+  #     - NET_ADMIN
+  #   volumes:
+  #     - /mnt/vol/video/downloads:/data
+  #     - /mnt/vol/dockerdata/deluge:/config
+  #   environment:
+  #     VPN_ENABLED: yes
+  #     VPN_USER: "tgrin" 
+  #     VPN_PASS: "7324102"
+  #     VPN_PROV: pia
+  #     VPN_CLIENT: openvpn
+  #     ENABLE_STARTUP_SCRIPTS: yes
+  #     ENABLE_PRIVOXY: yes
+  #     STRICT_PORT_FORWARD: no
+  #     USERSPACE_WIREGUARD: no
+  #     ENABLE_SOCKS: yes
+  #     SOCKS_USER: "tgrin"
+  #     SOCKS_PASS: "7324102"
+  #     LAN_NETWORK: "172.28.0.0/24,10.30.30.45/23,172.28.32.0/12"
+  #     # NAME_SERVERS: <name server ip(s)> \
+  #     DELUGE_DAEMON_LOG_LEVEL: info
+  #     DELUGE_WEB_LOG_LEVEL: debug
+  #     DELUGE_ENABLE_WEBUI_PASSWORD: yes
+  #     VPN_INPUT_PORTS: 1234
+  #     VPN_OUTPUT_PORTS: 5678
+  #     DEBUG: true
+  #     UMASK: 000
+  #     PUID: 1000
+  #     PGID: 1000
 
 networks:
   container_net:
