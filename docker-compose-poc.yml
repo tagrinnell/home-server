@@ -14,7 +14,7 @@
 #  /mnt/vol/dockerdata/overseerr    - Overseerr config and DB
 #  /mnt/vol/dockerdata/lib/modules  - Wireguard lib/modules
 #  /mnt/vol/dockerdata/wireguard    - Wrieguard config
-#
+# 
 # Folders for Media etc:
 #  /mnt/vol/photo                   - Root storage for photo files
 #  /mnt/vol/music                   - Root storage for music files
@@ -33,7 +33,9 @@
 #
 
 # https://github.com/ivan-pinatti/docker-torrent-box-with-vpn
+
 ---
+
 services:
   ### ----------------- Plex ----------------- ###
   plex:
@@ -125,27 +127,16 @@ services:
   ### ----------------- Proton VPN ---------- ### 
   protonwire:
     container_name: protonwire
-    # Use semver tags or sha256 hashes of manifests.
-    # using latest tag can lead to issues when used with
-    # automatic image updaters like watchtower/podman.
     image: ghcr.io/tprasadtp/protonwire:latest
     init: true
     restart: unless-stopped
     environment:
-      # Quote this value as server name can contain '#'.
-      PROTONVPN_SERVER: "149.40.58.146" #"node-us-64.protonvpn.net"  # NL-FREE#100070
-      # WIREGUARD_PRIVATE_KEY: "gLGL0//1k4LNjX4deP6bCQdUiBZZJTUCjy8EyBXs0Eo="
-      # Set this to 1 to show debug logs for issue forms.
+      PROTONVPN_SERVER: "149.40.58.146" 
       DEBUG: "0"
-      # Set this to 0 to disable kill-switch.
+      # Set this to 0 to disable kill-switch
       KILL_SWITCH: "1"
-    # NET_ADMIN capability is mandatory!
     cap_add:
       - NET_ADMIN
-    # sysctl net.ipv4.conf.all.rp_filter is mandatory!
-    # net.ipv6.conf.all.disable_ipv6 disables IPv6 as protonVPN does not support IPv6.
-    # 'net.*' sysctls are not required on application containers,
-    # as they share network stack with protonwire container.
     sysctls:
       net.ipv4.conf.all.rp_filter: 2
       net.ipv6.conf.all.disable_ipv6: 1
@@ -159,7 +150,7 @@ services:
       - 8112:8112
       - 17881:17881
       - 17881:17881/udp
-      - 58846:58846 #optional
+      - 58846:58846 
     networks:
       container_net:
         ipv4_address: 172.28.1.20
@@ -189,14 +180,7 @@ services:
     volumes:
       - /mnt/vol/dockerdata/deluge:/config
       - /mnt/vol/video/Downloads:/downloads
-    # ports:
-    #   - 8112:8112
-    #   - 17881:17881
-    #   - 17881:17881/udp
-    #   - 58846:58846 #optional
     restart: unless-stopped
-
-      
 
 networks:
   container_net:
