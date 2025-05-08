@@ -121,99 +121,55 @@ services:
     restart: unless-stopped
     networks:
       container_net:
-        ipv4_address: 172.28.0.14
-
-  ### ----------------- Deluge VPN ------------- ###
-  deluge-vpn:
-    container_name: deluge-vpn
-    image: binhex/arch-delugevpn
-    ports:
-      - 8112:8112
-      - 8118:8118
-      - 9118:9118 
-      - 58846:58846 
-      - 58946:58946 
-      - 58946:58946/udp 
+        ipv4_address: 172.28.1.14
+  ### ----------------- Proton VPN ---------- ### 
+  protonwire:
+    container_name: protonwire
+    # Use semver tags or sha256 hashes of manifests.
+    # using latest tag can lead to issues when used with
+    # automatic image updaters like watchtower/podman.
+    image: ghcr.io/tprasadtp/protonwire:latest
+    init: true
+    restart: unless-stopped
+    environment:
+      # Quote this value as server name can contain '#'.
+      PROTONVPN_SERVER: "149.40.58.146" #"node-us-64.protonvpn.net"  # NL-FREE#100070
+      # WIREGUARD_PRIVATE_KEY: "gLGL0//1k4LNjX4deP6bCQdUiBZZJTUCjy8EyBXs0Eo="
+      # Set this to 1 to show debug logs for issue forms.
+      DEBUG: "0"
+      # Set this to 0 to disable kill-switch.
+      KILL_SWITCH: "1"
+    # NET_ADMIN capability is mandatory!
     cap_add:
       - NET_ADMIN
+    # sysctl net.ipv4.conf.all.rp_filter is mandatory!
+    # net.ipv6.conf.all.disable_ipv6 disables IPv6 as protonVPN does not support IPv6.
+    # 'net.*' sysctls are not required on application containers,
+    # as they share network stack with protonwire container.
+    sysctls:
+      net.ipv4.conf.all.rp_filter: 2
+      net.ipv6.conf.all.disable_ipv6: 1
     volumes:
-      - /mnt/vol/video/downloads:/data
-      - /mnt/vol/dockerdata/deluge:/config
-    environment:
-      VPN_ENABLED: yes
-      VPN_USER: "tgrin" 
-      VPN_PASS: "7324102"
-      VPN_PROV: pia
-      VPN_CLIENT: openvpn
-      ENABLE_STARTUP_SCRIPTS: yes
-      ENABLE_PRIVOXY: no
-      STRICT_PORT_FORWARD: no
-      USERSPACE_WIREGUARD: no
-      ENABLE_SOCKS: yes
-      SOCKS_USER: "tgrin"
-      SOCKS_PASS: "7324102"
-      LAN_NETWORK: "172.28.1.0/24,10.30.30.45/23,172.28.32.0/12,10.48.25.33/23"
-      # NAME_SERVERS: <name server ip(s)> \
-      DELUGE_DAEMON_LOG_LEVEL: info
-      DELUGE_WEB_LOG_LEVEL: debug
-      DELUGE_ENABLE_WEBUI_PASSWORD: yes
-      VPN_INPUT_PORTS: 1234
-      VPN_OUTPUT_PORTS: 5678
-      DEBUG: true
-      UMASK: 000
-      PUID: 1000
-      PGID: 1000
-
-#  # ### ----------------- Proton VPN ---------- ### 
-  # protonwire:
-  #   container_name: protonwire
-  #   # Use semver tags or sha256 hashes of manifests.
-  #   # using latest tag can lead to issues when used with
-  #   # automatic image updaters like watchtower/podman.
-  #   image: ghcr.io/tprasadtp/protonwire:latest
-  #   init: true
-  #   restart: unless-stopped
-  #   environment:
-  #     # Quote this value as server name can contain '#'.
-  #     PROTONVPN_SERVER: "node-nl-96.protonvpn.net" # NL-FREE#100070
-  #     # Set this to 1 to show debug logs for issue forms.
-  #     DEBUG: "0"
-  #     # Set this to 0 to disable kill-switch.
-  #     KILL_SWITCH: "1"
-  #   # NET_ADMIN capability is mandatory!
-  #   cap_add:
-  #     - NET_ADMIN
-  #   # sysctl net.ipv4.conf.all.rp_filter is mandatory!
-  #   # net.ipv6.conf.all.disable_ipv6 disables IPv6 as protonVPN does not support IPv6.
-  #   # 'net.*' sysctls are not required on application containers,
-  #   # as they share network stack with protonwire container.
-  #   sysctls:
-  #     net.ipv4.conf.all.rp_filter: 2
-  #     net.ipv6.conf.all.disable_ipv6: 1
-  #   volumes:
-  #     - type: tmpfs
-  #       target: /mnt/vol/dockerdata/tmp
-  #     - type: bind
-  #       source: private.key
-  #       target: /mnt/vol/dockerdata/protonwire/private-key
-  #       read_only: true
-  #   ports:
-  #     - 8000:8000
+      - /mnt/vol/dockerdata/protonwire:/etc/protonwire
+    ports:
+      - 8080:8080
+      - 16881:16881
+    networks:
+      container_net:
+        ipv4_address: 172.28.1.20
   # ### ----------------- QBitTorrent ---------- ### 
-  # qbittorrent:
-  #   image: lscr.io/linuxserver/qbittorrent:latest
-  #   container_name: qbittorrent
-  #   depends_on:
-  #     - protonwire
-  #   network_mode: service:protonwire
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=America/Chicago
-  #     - TORRENTING_PORT=6881
-  #   volumes:
-  #     - /mnt/vol/dockerdata/qbt:/config
-  #     - /mnt/vol/video/Downloads:/downloads # optional
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbit
+    network_mode: service:protonwire
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+      - TORRENTING_PORT=16881
+    volumes:
+      - /mnt/vol/dockerdata/qbt:/config
+      - /mnt/vol/video/Downloads:/downloads # optional
 
 networks:
   container_net:
