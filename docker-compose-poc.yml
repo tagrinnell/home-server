@@ -79,8 +79,8 @@ services:
       - TZ=America/Chicago
     volumes:
       - /mnt/vol/dockerdata/radarr:/data
-      - /mnt/vol/video/movies:/movies #optional
-      - /mnt/vol/video/downloadsMovies:/downloads #optional
+      - /mnt/vol/video/movies:/movies
+      - /mnt/vol/video/downloadsMovies:/downloads
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -152,12 +152,18 @@ services:
     volumes:
       - /mnt/vol/dockerdata/protonwire:/etc/protonwire
     ports:
+      # Qbit ports
       - 8080:8080
       - 16881:16881
+      # Deluge Ports
+      - 8112:8112
+      - 17881:17881
+      - 17881:17881/udp
+      - 58846:58846 #optional
     networks:
       container_net:
         ipv4_address: 172.28.1.20
-  # ### ----------------- QBitTorrent ---------- ### 
+  ### ----------------- QBitTorrent ---------- ### 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbit
@@ -170,6 +176,27 @@ services:
     volumes:
       - /mnt/vol/dockerdata/qbt:/config
       - /mnt/vol/video/Downloads:/downloads # optional
+  ### ----------------- Deluge ---------- ### 
+  deluge:
+    image: lscr.io/linuxserver/deluge:latest
+    container_name: deluge
+    network_mode: service:protonwire
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+      - DELUGE_LOGLEVEL=info
+    volumes:
+      - /mnt/vol/dockerdata/deluge:/config
+      - /mnt/vol/video/Downloads:/downloads
+    # ports:
+    #   - 8112:8112
+    #   - 17881:17881
+    #   - 17881:17881/udp
+    #   - 58846:58846 #optional
+    restart: unless-stopped
+
+      
 
 networks:
   container_net:
