@@ -43,7 +43,7 @@ services:
   plex:
     image: plexinc/pms-docker
     container_name: plex
-    network_mode: host
+    # network_mode: host
     environment:
       - PUID=1000
       - PGID=1000
@@ -54,6 +54,8 @@ services:
       - /mnt/vol/dockerdata/plex:/config
       - /mnt/vol/video/tv:/tv
       - /mnt/vol/video/movies:/movies
+    ports:
+      - 32400:32400
     restart: unless-stopped
   ### ----------------- Sonarr --------------- ###
   sonarr:
@@ -84,7 +86,7 @@ services:
     volumes:
       - /mnt/vol/dockerdata/radarr:/data
       - /mnt/vol/video/movies:/movies
-      - /mnt/vol/video/downloadsMovies:/downloads
+      - /mnt/vol/video/Downloads:/downloads
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -152,6 +154,9 @@ services:
       - 17881:17881/udp
       - 58846:58846 
     restart: unless-stopped
+    networks:
+      container_net:
+        ipv4_address: 172.28.1.20
   
   ### ----------------- QBitTorrent ---------- ### 
   qbittorrent:
