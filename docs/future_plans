@@ -1,0 +1,15 @@
+Future Considerations:
+
+Need some sort of Reverse Proxy / Domain Resolution for:
+- Easy connections to server (jelly.domain.whatever instead of localhost:port)
+- 
+
+Options:
+1. Pangolin -- Also messes with tunnels and stuff ; useful for remote access probably (alternative to cloudflare tunnels)?
+  - docs.fossorial.io
+  - Probably a domain too for easy remote access -- namecheap.com
+2. Nginx / Apache (leaning towards Nginx for the reverse proxy, it doesnt look like apache does the same stuff)
+
+kodi.tv
+- Maybe useful with Jellyfin integration for native playback on TVs?
+Not sure if this is going to be particularly useful in terms of playback on TVs (Plex and Jellyfin might be enough as it is)
