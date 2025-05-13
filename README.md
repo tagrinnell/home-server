@@ -4,13 +4,13 @@
 
 This is my repo for the docker compose files that I'll be using for my (eventual) home server.  Currently, the I have a compose file for the following systems:
 
-1. Plex Media Server (Streaming)
+1. Plex Media Server / Jellyfin (Streaming) 
 2. Sonarr (Shows)
 3. Radarr (Movies)
 4. Overseerr (Library Management)
-5. ProtonVPN / Wireguard (VPN for Qbit)
-6. QBitTorrent (Torrenting)
-7. Jackett (Torrent Management(?))
+5. Gluetune (VPN for torrents)
+6. QBitTorrent/Deluge (Torrenting)
+7. Prowlarr (Indexing)
 
 ## Assorted Docs / General info
 
@@ -38,7 +38,7 @@ LinuxServer:
 3. [Overseer](https://github.com/linuxserver/docker-overseerr)
 4. [Wireguard](https://github.com/linuxserver/docker-wireguard)
 5. [Prowlarr](https://github.com/linuxserver/docker-prowlarr)
-5. [Jackett](https://github.com/linuxserver/docker-jackett)
+6. [Jackett](https://github.com/linuxserver/docker-jackett)
 
 Plex:
 1. [Plex Media Server](https://github.com/plexinc/pms-docker)
@@ -50,27 +50,27 @@ Associated Google Document with my own notes:
 ## Source Repositories
 
 Plex : https://github.com/plexinc \
+Jellyfin : https://github.com/jellyfin/jellyfin \
 Sonarr : https://github.com/Sonarr/Sonarr \
 Radarr : https://github.com/Radarr/Radarr \
 Overseerr : https://github.com/sct/Overseerr \
-Wireguard : https://git.zx2c4.com/wireguard-linux/tree/drivers/net/wireguard/ \
-Jackett : https://github.com/Jackett/Jacket
+Gluetun : https://github.com/qdm12/gluetun/ \
+Prowlarr : https://github.com/Prowlarr/Prowlarr
 
 ## Future Considerations
 
 [Advance Compose for Plex Ecosystem with a ton of different docker conatiners](https://github.com/DonMcD/ultimate-plex-stack/blob/main/advanced-compose.yml) 
 
-Prowlarr maybe? \
+~~Prowlarr maybe?~~ \
 Lidarr \
 Readarr \
 bazarr / plexautolanguages 
 
 ## Ports Running
 
-- Jackett - 9117 -- Using Prowlarr now
-- Prowlarr - 9696
-- Overseerr - 5055
-- Radarr - 7878
-- Sonarr - 8989
-- Wireguard - 51821
-- Plex - 31240
+- Plex : 31240
+- Jellyfin : 8096
+- Overseerr : 5055
+- Prowlarr : 9696
+- Radarr : 7878
+- Sonarr : 8989
