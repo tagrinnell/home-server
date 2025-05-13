@@ -1,9 +1,12 @@
 # Docker compose to set up containers for all services you need:
 # VPN
-#   Sonarr, Radarr, Lidarr, Qbittorrent
+#   QBitTorrent
 # Non-VPN
-#   Plex, get_iplayer
+#   Plex, Jellyfin, *arr, Overseerr
+#
 # Before running docker-compose, you should pre-create all of the following folders.
+# create_dirs.sh is a helper script that helps with this
+#
 # Folders for Docker State:
 #  /mnt/vol/dockerdata              - root where this docker-compose.yml should live
 #  /mnt/vol/dockerdata/plex         - Plex config and DB
@@ -12,8 +15,9 @@
 #  /mnt/vol/dockerdata/qbt          - QBitorrent config and DB
 #  /mnt/vol/dockerdata/prowlarr     - Prowlarr config and DB
 #  /mnt/vol/dockerdata/overseerr    - Overseerr config and DB
-#  /mnt/vol/dockerdata/lib/modules  - Wireguard lib/modules
-#  /mnt/vol/dockerdata/wireguard    - Wrieguard config
+#  /mnt/vol/dockerdata/jelly        - Jellyfin root folder
+#  /mnt/vol/dockerdata/jelly/config - Jellyfin config folder
+#  /mnt/vol/dockerdata/jelly/cache  - Jellyfin cache folder
 # 
 # Folders for Media etc:
 #  /mnt/vol/photo                   - Root storage for photo files
@@ -21,19 +25,15 @@
 #  /mnt/vol/video                   - Root storage for video files
 #  /mnt/vol/video/tv                - folder for Sonarr/Plex TV shows
 #  /mnt/vol/video/movies            - folder for Radarr/Plex Movies
-#  /mnt/vol/video/downloads         - QBT folder for TV downloads (that Sonarr will process)
-#  /mnt/vol/video/downloadsMovies   - QBT folder for Movie downloads (that Radarr will process)
+#  /mnt/vol/video/Downloads         - QBT folder for downloads \
 #
 # Note that Sonarr and Radarr don't necessarily need the VPN if you're using Prowlarr for the indexers. 
 # But Prowlarr should be behind the VPN to avoid ISPs that block indexers.
 
-#
-# Taken from: https://gist.github.com/Webreaper/81ecda3ecc45fa61a16dfc90cfc4550d
+# Other Resources
+# https://gist.github.com/Webreaper/81ecda3ecc45fa61a16dfc90cfc4550d
 # https://linuxiac.com/how-to-set-up-wireguard-vpn-with-docker/
-#
-
 # https://github.com/ivan-pinatti/docker-torrent-box-with-vpn
-
 # https://github.com/RogueOneEcho/how-to-setup-deluge-with-protonvpn-portforward/tree/part-1 
 
 ---
@@ -73,18 +73,7 @@ services:
         source: /mnt/vol/video/movies
         target: /movies
         read_only: true
-      # Optional - extra fonts to be used during transcoding with subtitle burn-in
-      # - type: bind
-      #   source: /path/to/fonts
-      #   target: /usr/local/share/fonts/custom
-      #   read_only: true
     restart: 'unless-stopped'
-    # # Optional - alternative address used for autodiscovery
-    # environment:
-    #   - JELLYFIN_PublishedServerUrl=http://example.com
-    # # Optional - may be necessary for docker healthcheck to pass if running in host network mode
-    # extra_hosts:
-    #   - 'host.docker.internal:host-gateway'
   ### ----------------- Sonarr --------------- ###
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
@@ -185,7 +174,6 @@ services:
     networks:
       container_net:
         ipv4_address: 172.28.1.20
-  
   ### ----------------- QBitTorrent ---------- ### 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
