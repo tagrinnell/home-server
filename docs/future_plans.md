@@ -9,8 +9,9 @@ Options:
   - docs.fossorial.io
   - Probably a domain too for easy remote access -- namecheap.com
   - Encryption -- Let's Encrypt => Having https for generally everything would be nice
+  - This is something that is way in the future most likely, this requires using a cloud client to open the tunnel, which I'm not a fan about ;; Probably a long-term thing if I have this set up for a long time.  Otherwise, probably just an Nginx/Apache with port forwarding would be fine.
 2. Nginx / Apache (leaning towards Nginx for the reverse proxy, it doesnt look like apache does the same stuff)
-
+  - If I use this, I definitely need to use fail2ban with good passwords for authentication.
 kodi.tv
 - Maybe useful with Jellyfin integration for native playback on TVs?
 Not sure if this is going to be particularly useful in terms of playback on TVs (Plex and Jellyfin might be enough as it is)

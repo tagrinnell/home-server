@@ -110,6 +110,26 @@ services:
       container_net:
         ipv4_address: 172.28.1.12
 
+  ### ----------------- Lidarr --------------- ###
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - /mnt/vol/dockerdata/lidarr:/config
+      - /mnt/vol/music:/music #optional
+      - /mnt/vol/downloads:/downloads #optional
+    ports:
+      - 8686:8686
+    restart: unless-stopped
+    networks:
+      container_net:
+        ipv4_address: 172.28.1.10
+
+
   ### ----------------- Overseer ------------- ###
   overseerr:
     image: lscr.io/linuxserver/overseerr:latest
@@ -208,6 +228,20 @@ services:
       - /mnt/vol/video/Downloads:/downloads
     restart: unless-stopped
 
+  ### ----------------- Caddy Reverse Proxy ---------- ### 
+  dnsmasq:
+    image: andyshinn/dnsmasq:latest
+    container_name: dnsmasq
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - 53:53/udp
+      - 53:53
+    volumes:
+      - /mnt/vol/dockerdata/dnsmaq/dnsmaq.conf:/etc/dnsmasq.conf
+    restart: unless-stopped
+
+
 networks:
   container_net:
     driver: bridge
@@ -215,3 +249,5 @@ networks:
       config:
         - subnet: 172.28.1.0/24
           gateway: 172.28.1.1
+  caddy:
+    external: true
