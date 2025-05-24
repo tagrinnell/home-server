@@ -1,0 +1,19 @@
+Created by...
+___.   .__       .__
+\_ |__ |__| ____ |  |__   ____ ___  ___
+ | __ \|  |/    \|  |  \_/ __ \\  \/  /
+ | \_\ \  |   |  \   Y  \  ___/ >    <
+ |___  /__|___|  /___|  /\___  >__/\_ \
+     \/        \/     \/     \/      \/
+   https://hub.docker.com/u/binhex/
+
+2025-04-14 02:08:48.687479 [info] System information: Linux 2ca353d05af8 5.15.167.4-microsoft-standard-WSL2 #1 SMP Tue Nov 5 00:21:55 UTC 2024 x86_64 GNU/Linux
+2025-04-14 02:08:48.699316 [info] Image tags: BASE_RELEASE_TAG=2024122301,INT_RELEASE_TAG=2024122301,IMAGE_RELEASE_TAG=2.1.1-8-03
+2025-04-14 02:08:48.711506 [warn] PUID not defined (via -e PUID), defaulting to '99'
+2025-04-14 02:08:48.750025 [warn] PGID not defined (via -e PGID), defaulting to '100'
+2025-04-14 02:08:48.775657 [warn] UMASK not defined (via -e UMASK), defaulting to '000'
+2025-04-14 02:08:48.788783 [info] Setting permissions recursively on '/config'...
+2025-04-14 02:08:48.808328 [info] Deleting files in /tmp (non recursive)...
+2025-04-14 02:08:48.822824 [warn] VPN_ENABLED not defined,(via -e VPN_ENABLED), defaulting to 'yes'
+2025-04-14 02:08:48.836273 [warn] VPN_CLIENT not defined (via -e VPN_CLIENT), defaulting to 'openvpn'
+2025-04-14 02:08:48.848742 [crit] VPN_PROV not defined,(via -e VPN_PROV), exiting...

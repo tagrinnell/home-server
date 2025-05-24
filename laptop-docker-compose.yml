@@ -71,6 +71,21 @@ services:
         target: /movies
         read_only: true
     restart: 'unless-stopped'
+
+  ### ----------------- Tautalli ----------------- ###
+  tautulli:
+    image: lscr.io/linuxserver/tautulli:latest
+    container_name: tautulli
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - /mnt/vol/dockerdata/tautalli:/config
+    ports:
+      - 8181:8181
+    restart: unless-stopped
+    
   ### ----------------- Sonarr --------------- ###
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
