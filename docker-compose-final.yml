@@ -41,7 +41,7 @@
 services:
   ### ----------------- Plex ----------------- ###
   plex:
-    image: plexinc/pms-docker
+    image: plexinc/pms-docker:latest
     container_name: plex
     network_mode: host
     environment:
@@ -53,7 +53,6 @@ services:
       - /mnt/vol/dockerdata/plex:/config
       - /mnt/vol/video/tv:/tv
       - /mnt/vol/video/movies:/movies
-    restart: unless-stopped
     
   ### ----------------- JellyFin ----------------- ###
   jellyfin:
@@ -210,6 +209,7 @@ services:
     volumes:
       - /mnt/vol/dockerdata/qbt:/config
       - /mnt/vol/video/Downloads:/downloads
+    restart: 'unless-stopped'
 
   ### ----------------- Deluge ---------- ### 
   deluge:
@@ -226,20 +226,20 @@ services:
     volumes:
       - /mnt/vol/dockerdata/deluge:/config
       - /mnt/vol/video/Downloads:/downloads
-    restart: unless-stopped
+    # restart: unless-stopped
 
   ### ----------------- Caddy Reverse Proxy ---------- ### 
-  dnsmasq:
-    image: andyshinn/dnsmasq:latest
-    container_name: dnsmasq
-    cap_add:
-      - NET_ADMIN
-    ports:
-      - 53:53/udp
-      - 53:53
-    volumes:
-      - /mnt/vol/dockerdata/dnsmaq/dnsmaq.conf:/etc/dnsmasq.conf
-    restart: unless-stopped
+    # dnsmasq:
+    #   image: andyshinn/dnsmasq:latest
+    #   container_name: dnsmasq
+    #   cap_add:
+    #     - NET_ADMIN
+    #   ports:
+    #     - 53:53/udp
+    #     - 53:53
+    #   volumes:
+    #     - /mnt/vol/dockerdata/dnsmaq/dnsmaq.conf:/etc/dnsmasq.conf
+    #   restart: unless-stopped
 
 
 networks:
