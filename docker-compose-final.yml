@@ -233,6 +233,21 @@ services:
       - /mnt/vol/video/Downloads:/downloads
     restart: unless-stopped
 
+  ### ----------------- Flaresolverr ---------- ### 
+  flaresolverr:
+    # DockerHub mirror flaresolverr/flaresolverr:latest
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - TZ=America/Chicago
+    ports:
+      - "8191:8191"
+    restart: unless-stopped
+    networks:
+      container_net:
+        ipv4_address: 172.28.1.21
+
   ### ----------------- Caddy Reverse Proxy ---------- ### 
   # dnsmasq:
   #   image: andyshinn/dnsmasq:latest
